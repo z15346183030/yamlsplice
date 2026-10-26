@@ -114,6 +114,16 @@ class TestPreservesWhatItDoesNotTouch(unittest.TestCase):
         src = '"key": 1\n'
         self.assertEqual(set_(src, "key", "2"), '"key": 2\n')
 
+    def test_block_scalar_does_not_swallow_the_blank_line_after_it(self):
+        # 踩过的坑：块标量的右边界一度把后面那个空行也算进去，导致空行被吃掉
+        src = "s: |\n  a\n  b\n\nnext: 1\n"
+        self.assertEqual(set_(src, "s", "x\n", True), "s: |\n  x\n\nnext: 1\n")
+
+    def test_empty_string_value(self):
+        # 踩过的坑："" 在 Python 里是任何字符串的子串，类型推断一度把空串当 flow 集合
+        self.assertEqual(set_("a: x\n", "a", "", True), 'a: ""\n')
+        self.assertEqual(set_('a: "x"\n', "a", "", True), 'a: ""\n')
+
     def test_other_documents_are_not_rewritten(self):
         src = "---\na: 1\n---\nb: 2\n"
         out = set_(src, "a", "9")
