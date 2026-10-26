@@ -1,0 +1,40 @@
+# 演示用配置：一段有注释、有空行、有列表缩进风格的 k8s Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-web
+  labels:
+    app: demo
+    tier: frontend
+
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: demo
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.25
+          ports:
+            - containerPort: 80
+          env:
+            - name: LOG_LEVEL
+              value: info
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
+# 下面的配置由值班同学维护，改之前先在群里说一声
+ops:
+  owner: platform-team
+  oncall:
+    - 15346183030
+  runbook: |
+    1. 先看 kubectl get pods
+    2. 再看 kubectl logs
